@@ -1,6 +1,7 @@
 const express=require("express");
 
 const router =express.Router();
+var mongoose = require('mongoose');
 const {body,validationResult} = require('express-validator');
 
 //bring in article
@@ -88,33 +89,31 @@ router.post("/edit/:id",(req,res)=>{
 
 //get single article
 router.get('/:id',[],(req,res)=>{
-    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-        res.redirect("/");
-    }
-    Article.findById(req.params.id,(err,data)=>{
-        if(err){
-            console.log(err);
-        }
-        // console.log("hello")
-        console.log(data);
-        if(data!=null){
+    if(mongoose.Types.ObjectId.isValid(req.params.id)) {
+        Article.findOne(req.params.id,(err,data)=>{
+            if(err){
+                console.log(err);
+                res.redirect("/");
+            }
+            // console.log("hello")
+            console.log(data);
             user.findById(data.author,function(err,user){
                 res.render('article',{
                     title: "Article",
                     data: data,
                     author : user.name 
                 });
-            })
+            });
 
-        }
         
-        else{
-            res.redirect("/");
-        }
         // console.log(data);
-        
+
     });
-})
+    }
+    else{
+        res.redirect("/");
+    }
+});
 
 router.delete("/:id",(req,res)=>{
     if(!req.user._id){
