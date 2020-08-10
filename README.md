@@ -14,8 +14,9 @@ This is a Basic app using Node.js & Express
     1.0.0
 
 ## Usage
-
-### installation
+### Installation
     Install the dependencies
+    using npm install
+    &     npm start
 
     
