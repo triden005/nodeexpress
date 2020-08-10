@@ -3,11 +3,12 @@ const path=require('path');
 const mongoose=require("mongoose");
 const bodyParser = require('body-parser');
 // const expressValidator = require('express-validator');
-const {body,validationResult} = require('express-validator');
+const { body ,validationResult} = require('express-validator');
 // const flash = require('connect-flash');
 const session = require("express-session");
+const config = require("./config/database");
 
-mongoose.connect('mongodb://localhost/nodebackend',{useNewUrlParser: true,useUnifiedTopology: true,});
+mongoose.connect(config.database,{useNewUrlParser: true,useUnifiedTopology: true,});
 
 const db=mongoose.connection;
 db.on('error',(err)=>{
@@ -43,7 +44,7 @@ app.use(express.static(path.join(__dirname,"public")));
 //express session
 app.use(session({
     secret: 'keyboard cat',
-    resave: true,
+    resave: false,
     saveUninitialized: true,
   }));
 
@@ -55,11 +56,24 @@ app.use(function (req, res, next) {
 });
 
 //express validator
-//not added anything
+// passport config
+const passport = require("passport");
+
+require("./config/passport")(passport);
+
+//passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+//adding authname
+app.get("*",(req,res,next)=>{
+    res.locals.user=req.user || null;
+    next();
+})
 
 //home route
 app.get('/',(req,res)=>{
-
+    console.log(req.user)
     Article.find({},function(err,articlesdata){
         if(err){
             console.log(err);
@@ -79,7 +93,9 @@ app.get('/',(req,res)=>{
 let articles=require("./routes/articles.js");
 app.use("/articles",articles);
 
-
+// route users
+let users = require("./routes/users");
+app.use("/users",users);
 
 
 //start server

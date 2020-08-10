@@ -12,16 +12,22 @@ html(lang="en")
             button.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarNav', aria-controls='navbarNav', aria-expanded='false', aria-label='Toggle navigation')
                 span.navbar-toggler-icon
             #navbarNav.collapse.navbar-collapse
-                ul.navbar-nav
+                ul.navbar-nav.mr-auto
                     li.nav-item.active
                         a.nav-link(href='/') Home
                             span.sr-only (currefdgdfgdbfdnt)
-                    li.nav-item
-                        a.nav-link(href='/articles/add') Add articles
-                    li.nav-item
-                        a.nav-link(href='#') Pricing
-                    li.nav-item
-                        a.nav-link.disabled(href='#', tabindex='-1', aria-disabled='true') Disabled
+                    if user
+                        li.nav-item
+                            a.nav-link(href='/articles/add') Add articles
+                ul.navbar-nav
+                    if user
+                        li.nav-item
+                            a.nav-link(href='/users/logout') Logout
+                    else
+                        li.nav-item
+                            a.nav-link(href='/users/register') Sign up
+                        li.nav-item
+                            a.nav-link(href='/users/login') Login 
         .container
             != messages('message', locals)
             if errors

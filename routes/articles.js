@@ -5,16 +5,19 @@ const {body,validationResult} = require('express-validator');
 
 //bring in article
 let Article = require('../models/article.js');
+//bringing article model
+let user=require("../models/user");
+const article = require("../models/article.js");
 //add route
-router.get("/add" , (req,res)=>{
+router.get("/add" ,ensureAuthenticated, (req,res)=>{
     res.render('add_article',{
         title:"Add Article"
     });
 });
 //add submit post route
-router.post('/add',[
+router.post('/add',ensureAuthenticated,[
     body("title","title is required").notEmpty(),
-    body("author","author is required").notEmpty(),
+    // body("author","author is required").notEmpty(),
     body("body","body is required").notEmpty(),
     ]
 ,(req,res)=>{
@@ -30,7 +33,7 @@ router.post('/add',[
     else{
         let article=new Article();
         article.title=req.body.title;
-        article.author=req.body.author;
+        article.author=req.user._id;
         article.body=req.body.body;
 
         article.save((err)=>{
@@ -48,9 +51,13 @@ router.post('/add',[
 
 
 //load edit form 
-router.get('/edit/:id',(req,res)=>{
+router.get('/edit/:id',ensureAuthenticated,(req,res)=>{
     Article.findById(req.params.id,(err,data)=>{
         console.log(data);
+        if(data.author!=req.user._id){
+            req.flash("danger","please login");
+            res.redirect("/users/login");
+        }
         res.render('edit_article',{
             title:"edit",
             data:data 
@@ -61,7 +68,7 @@ router.get('/edit/:id',(req,res)=>{
 router.post("/edit/:id",(req,res)=>{
     let article={}
     article.title=req.body.title;
-    article.author=req.body.author;
+    article.author=req.user._id;
     article.body=req.body.body;
 
     let query = {_id:req.params.id}
@@ -82,28 +89,54 @@ router.post("/edit/:id",(req,res)=>{
 //get single article
 router.get('/:id',(req,res)=>{
     Article.findById(req.params.id,(err,data)=>{
-        console.log(data);
-        res.render('article',{
-            data:data 
-        });
+        user.findById(data.author,function(err,user){
+            res.render('article',{
+                data:data,
+                author : user.name 
+            });
+        })
+        // console.log(data);
+        
     });
 })
 
 router.delete("/:id",(req,res)=>{
+    if(!req.user._id){
+        res.status(500).send("bad request")
+    }
+
     let query={_id:req.params.id}
+
+    Article.findById(req.params.id,function(err,data){
+        if(data.author!= req.user._id){
+            res.status(500).send("bad request dude");
+        } else{
+            Article.remove(query,(err)=>{
+                if(err){
+                    console.log(err);
+                    res.send(400, "Unable to find customer.");
+                    res.status(402).send("Not found.");
+                }
+                else{
+                    res.send(200,'success');
+                }
+            });
+        }
+    })
     
    
-    Article.remove(query,(err)=>{
-        if(err){
-            console.log(err);
-            res.send(400, "Unable to find customer.");
-            res.status(402).send("Not found.");
-        }
-        else{
-            res.send(200,'success');
-        }
-    });
+   
 });
+// access control
 
+function ensureAuthenticated (req,res,next){
+    if(req.isAuthenticated()){
+        return next();
+
+    }else{
+        req.flash("danger","Please Login First");
+        res.redirect("/users/login");
+    }
+}
 
 module.exports = router;
