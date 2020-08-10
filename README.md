@@ -1,15 +1,21 @@
-# nodeexpress
+# KnowledgeBase
 ----
-## KnowledgeBase
-This is a Basic app using NOde.js & Express
+This is a Basic app using Node.js & Express
 ### Technologies
   * Node.js
   * Express
   * Express Messages,Session ,Connect Flash & Validation
   * MongoDB & Mongoose
-  * Pug 
+  * Pug Templating
+  * Passport.js Authentication
+  * Bcrypt Hashing
 
 ### Version
     1.0.0
+
+## Usage
+
+### installation
+    Install the dependencies
 
     
