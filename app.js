@@ -97,6 +97,9 @@ app.use("/articles",articles);
 let users = require("./routes/users");
 app.use("/users",users);
 
+app.get("*",(req,res)=>{
+    res.redirect("/");
+})
 
 //start server
 app.listen (3000,()=>{

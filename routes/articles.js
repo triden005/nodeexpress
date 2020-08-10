@@ -59,7 +59,7 @@ router.get('/edit/:id',ensureAuthenticated,(req,res)=>{
             res.redirect("/users/login");
         }
         res.render('edit_article',{
-            title:"edit",
+            title:"Edit Article",
             data:data 
         });
     });
@@ -87,14 +87,30 @@ router.post("/edit/:id",(req,res)=>{
 })
 
 //get single article
-router.get('/:id',(req,res)=>{
+router.get('/:id',[],(req,res)=>{
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+        res.redirect("/");
+    }
     Article.findById(req.params.id,(err,data)=>{
-        user.findById(data.author,function(err,user){
-            res.render('article',{
-                data:data,
-                author : user.name 
-            });
-        })
+        if(err){
+            console.log(err);
+        }
+        // console.log("hello")
+        console.log(data);
+        if(data!=null){
+            user.findById(data.author,function(err,user){
+                res.render('article',{
+                    title: "Article",
+                    data: data,
+                    author : user.name 
+                });
+            })
+
+        }
+        
+        else{
+            res.redirect("/");
+        }
         // console.log(data);
         
     });
@@ -138,5 +154,9 @@ function ensureAuthenticated (req,res,next){
         res.redirect("/users/login");
     }
 }
+
+router.get("*",(req,res)=>{
+    res.redirect("/");
+})
 
 module.exports = router;
